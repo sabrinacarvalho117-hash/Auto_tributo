@@ -95,6 +95,22 @@ def aplicar_regras_credito(df):
                 str(cst_pis) in ["50", "51", "52", "53"] and
                 str(cst_cofins) in ["50", "51", "52", "53"] and
                 (aliq_pis > 0 or aliq_cofins > 0)
+        # Aplicar regras de crédito de PIS/COFINS
+def aplicar_regras_credito(df):
+    df["credito_permitido"] = False
+    for i, row in df.iterrows():
+        try:
+            cfop = row[8]
+            cst_pis = row[9]
+            cst_cofins = row[10]
+            aliq_pis = float(row[11]) if row[11] else 0
+            aliq_cofins = float(row[12]) if row[12] else 0
+
+            if (
+                str(cfop).startswith(("1", "2", "3")) and
+                str(cst_pis) in ["50", "51", "52", "53"] and
+                str(cst_cofins) in ["50", "51", "52", "53"] and
+                (aliq_pis > 0 or aliq_cofins > 0)
             ):
                 df.at[i, "credito_permitido"] = True
         except:
@@ -102,6 +118,7 @@ def aplicar_regras_credito(df):
     return df
 
 df_c170 = aplicar_regras_credito(df_c170)
+
 
 # Exibir os itens que geram crédito
 st.subheader("💰 Itens com crédito permitido de PIS/COFINS")
@@ -124,6 +141,7 @@ st.download_button(
     file_name="AutoTributo_credito.txt",
     mime="text/plain"
 )
+
 
 
 
