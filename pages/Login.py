@@ -6,8 +6,8 @@ names = ['Sabrina']
 usernames = ['sabrina']
 passwords = ['12345']  # lista de senhas em texto
 
-# 🔒 Gera os hashes individualmente
-hashed_passwords = [stauth.Hasher(password).hash() for password in passwords]
+# ✅ Gera os hashes corretamente (usando lista)
+hashed_passwords = stauth.Hasher(passwords).generate()
 
 # 🔐 Configuração do autenticador
 authenticator = stauth.Authenticate(
@@ -20,18 +20,17 @@ authenticator = stauth.Authenticate(
 )
 
 # 🧑 Login
-name, authentication_status, username = authenticator.login('Login', 'main')
+authenticator.login('Login', 'main')
 
-# ✅ Se login for bem-sucedido
-if authentication_status:
-    st.success(f'Bem-vinda, {name}!')
+# 🔍 Verifica status de autenticação
+if st.session_state["authentication_status"]:
+    st.success(f'Bem-vinda, {st.session_state["name"]}!')
     st.markdown("Você está autenticada e pode acessar todas as funcionalidades do AutoTributo.")
 
-# ❌ Se login falhar
-elif authentication_status is False:
+elif st.session_state["authentication_status"] is False:
     st.error('Usuário ou senha incorretos.')
 
-# ⚠️ Se ainda não logou
-elif authentication_status is None:
+elif st.session_state["authentication_status"] is None:
     st.warning('Por favor, insira suas credenciais.')
+
 
