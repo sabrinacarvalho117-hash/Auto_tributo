@@ -95,6 +95,7 @@ def aplicar_regras_credito(df):
                 str(cst_pis) in ["50", "51", "52", "53"] and
                 str(cst_cofins) in ["50", "51", "52", "53"] and
                 (aliq_pis > 0 or aliq_cofins > 0)
+            ):
         # Aplicar regras de crédito de PIS/COFINS
 def aplicar_regras_credito(df):
     df["credito_permitido"] = False
@@ -141,6 +142,7 @@ st.download_button(
     file_name="AutoTributo_credito.txt",
     mime="text/plain"
 )
+
 
 
 
