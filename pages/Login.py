@@ -4,10 +4,10 @@ import streamlit_authenticator as stauth
 # 🔐 Lista de usuários autorizados
 names = ['Sabrina']
 usernames = ['sabrina']
-passwords = ['12345']  # precisa ser uma lista de strings
+passwords = ['12345']  # lista de senhas em texto
 
-# 🔒 Gera os hashes seguros
-hashed_passwords = stauth.Hasher(passwords).generate()
+# 🔒 Gera os hashes individualmente
+hashed_passwords = [stauth.Hasher(password).hash() for password in passwords]
 
 # 🔐 Configuração do autenticador
 authenticator = stauth.Authenticate(
@@ -34,3 +34,4 @@ elif authentication_status is False:
 # ⚠️ Se ainda não logou
 elif authentication_status is None:
     st.warning('Por favor, insira suas credenciais.')
+
