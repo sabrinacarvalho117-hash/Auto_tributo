@@ -3,11 +3,11 @@ import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
 
-# Carrega o arquivo de configuração
+# Carregar config.yaml
 with open('config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
-# Cria o autenticador
+# Inicializar autenticação
 authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
@@ -16,13 +16,14 @@ authenticator = stauth.Authenticate(
     config['preauthorized']
 )
 
-# Login
-authenticator.login('main')
+# Tela de login
+name, authentication_status, username = authenticator.login("Login", "main")
 
-# Verifica status
-if st.session_state["authentication_status"]:
-    st.success(f"Bem-vinda, {st.session_state['name']}!")
-elif st.session_state["authentication_status"] is False:
+# Verificar status
+if authentication_status:
+    st.success(f"Bem-vinda, {name}!")
+    st.write("Você está logada no AutoTributo.")
+elif authentication_status is False:
     st.error("Usuário ou senha incorretos.")
-elif st.session_state["authentication_status"] is None:
+elif authentication_status is None:
     st.warning("Por favor, insira suas credenciais.")
