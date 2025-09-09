@@ -28,9 +28,9 @@ if uploaded_file is not None:
 import io
 
 # Transformar blocos em DataFrames
+dados = ler_arquivo_sped(uploaded_file)
 df_c100 = pd.DataFrame(dados["C100"]) if dados["C100"] else pd.DataFrame()
 df_c170 = pd.DataFrame(dados["C170"]) if dados["C170"] else pd.DataFrame()
-df = pd.DataFrame(dados["C100"]) if "C100" in dados else pd.DataFrame()
 
 st.subheader("📄 Visualização dos dados")
 
@@ -65,6 +65,7 @@ def gerar_excel(df1, df2):
 
     if st.checkbox("Mostrar blocos C170"):
         st.write(dados["C170"])
+
 
 
 
