@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import io
 
-# Função para ler o arquivo SPED
+# Funções principais
 def ler_arquivo_sped(uploaded_file):
     blocos = { "C100": [], "C170": [] }
     conteudo = uploaded_file.read().decode("utf-8")
@@ -15,7 +15,6 @@ def ler_arquivo_sped(uploaded_file):
                 blocos[tipo_bloco].append(partes)
     return blocos
 
-# Função para aplicar regras de crédito de PIS/COFINS
 def aplicar_regras_credito(df):
     df["credito_permitido"] = False
     for i, row in df.iterrows():
@@ -25,7 +24,6 @@ def aplicar_regras_credito(df):
             cst_cofins = row[10]
             aliq_pis = float(row[11]) if row[11] else 0
             aliq_cofins = float(row[12]) if row[12] else 0
-
             if (
                 str(cfop).startswith(("1", "2", "3")) and
                 str(cst_pis) in ["50", "51", "52", "53"] and
@@ -33,11 +31,21 @@ def aplicar_regras_credito(df):
                 (aliq_pis > 0 or aliq_cofins > 0)
             ):
                 df.at[i, "credito_permitido"] = True
-        except Exception:
+        except:
             continue
     return df
 
-# Função para calcular crédito estimado
+def aplicar_regras_avancadas(df):
+    df["credito_ncm"] = False
+    for i, row in df.iterrows():
+        try:
+            ncm = str(row[3])  # DESCR_COMPL ou COD_ITEM
+            if ncm.startswith("3004"):  # medicamentos
+                df.at[i, "credito_ncm"] = True
+        except:
+            continue
+    return df
+
 def calcular_credito(df):
     df["valor_credito"] = 0.0
     for i, row in df.iterrows():
@@ -51,7 +59,6 @@ def calcular_credito(df):
             continue
     return df
 
-# Função para gerar Excel
 def gerar_excel(df1, df2):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
@@ -59,14 +66,12 @@ def gerar_excel(df1, df2):
         df2.to_excel(writer, sheet_name='C170', index=False)
     return output.getvalue()
 
-# Função para gerar Excel com crédito
 def gerar_excel_credito(df):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, sheet_name='Itens com Crédito', index=False)
     return output.getvalue()
 
-# Função para gerar TXT com os itens que têm crédito permitido
 def gerar_txt_credito(df):
     linhas_formatadas = []
     for linha in df.values:
@@ -87,86 +92,81 @@ if uploaded_file is not None:
     df_c100 = pd.DataFrame(dados["C100"]) if dados["C100"] else pd.DataFrame()
     df_c170 = pd.DataFrame(dados["C170"]) if dados["C170"] else pd.DataFrame()
 
+    # Renomear colunas
+    df_c100.columns = [
+        "REG", "IND_OPER", "IND_EMIT", "COD_PART", "COD_MOD", "COD_SIT", "SER", "NUM_DOC",
+        "CHV_NFE", "DT_DOC", "DT_ENT", "VL_DOC", "IND_PGTO", "VL_DESC", "VL_ABAT_NT", "VL_MERC",
+        "IND_FRT", "VL_FRT", "VL_SEG", "VL_OUT_DA", "VL_BC_ICMS", "VL_ICMS", "VL_BC_ICMS_ST",
+        "VL_ICMS_ST", "VL_IPI", "VL_PIS", "VL_COFINS", "VL_PIS_ST", "VL_COFINS_ST"
+    ]
+    df_c170.columns = [
+        "REG", "NUM_ITEM", "COD_ITEM", "DESCR_COMPL", "QTD", "UNID", "VL_ITEM",
+        "VL_DESC", "CFOP", "CST_PIS", "CST_COFINS", "ALIQ_PIS", "ALIQ_COFINS"
+    ]
+
     st.success("Arquivo lido com sucesso!")
     st.subheader("📄 Visualização dos dados")
-
     st.write("Bloco C100 – Cabeçalhos de NFes")
     st.dataframe(df_c100)
-
     st.write("Bloco C170 – Itens das NFes")
     st.dataframe(df_c170)
 
-    excel_bytes = gerar_excel(df_c100, df_c170)
     st.download_button(
         label="📥 Baixar Excel com os dados",
-        data=excel_bytes,
+        data=gerar_excel(df_c100, df_c170),
         file_name="AutoTributo_dados.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-    # Aplicar regras de crédito
+    # Aplicar regras
     df_c170 = aplicar_regras_credito(df_c170)
+    df_c170 = aplicar_regras_avancadas(df_c170)
 
-    # Filtrar itens com crédito permitido
-    if "credito_permitido" in df_c170.columns:
-        df_credito = df_c170[df_c170["credito_permitido"] == True]
-        df_credito = calcular_credito(df_credito)
-        total_credito = df_credito["valor_credito"].sum()
+    df_credito = df_c170[
+        (df_c170["credito_permitido"] == True) | (df_c170["credito_ncm"] == True)
+    ]
+    df_credito = calcular_credito(df_credito)
+    total_credito = df_credito["valor_credito"].sum()
 
-        st.subheader("💰 Itens com crédito permitido de PIS/COFINS")
-        st.metric(label="💸 Crédito Fiscal Estimado (PIS + COFINS)", value=f"R$ {total_credito:,.2f}")
+    st.subheader("💰 Itens com crédito permitido de PIS/COFINS")
+    st.metric(label="💸 Crédito Fiscal Estimado", value=f"R$ {total_credito:,.2f}")
 
-        # Filtros interativos
-        st.subheader("🔍 Filtros Interativos")
-        cfop_opcoes = sorted(df_credito[8].dropna().unique())
-        cfop_selecionado = st.multiselect("Filtrar por CFOP", cfop_opcoes)
+    # Filtros interativos
+    st.subheader("🔍 Filtros Interativos")
+    cfop_opcoes = sorted(df_credito["CFOP"].dropna().unique())
+    cfop_selecionado = st.multiselect("Filtrar por CFOP", cfop_opcoes)
 
-        cst_opcoes = sorted(df_credito[9].dropna().unique())
-        cst_selecionado = st.multiselect("Filtrar por CST PIS", cst_opcoes)
+    cst_opcoes = sorted(df_credito["CST_PIS"].dropna().unique())
+    cst_selecionado = st.multiselect("Filtrar por CST PIS", cst_opcoes)
 
-        df_filtrado = df_credito.copy()
-        if cfop_selecionado:
-            df_filtrado = df_filtrado[df_filtrado[8].isin(cfop_selecionado)]
-        if cst_selecionado:
-            df_filtrado = df_filtrado[df_filtrado[9].isin(cst_selecionado)]
+    data_inicio = st.date_input("Data inicial", value=pd.to_datetime("2025-01-01"))
+    data_fim = st.date_input("Data final", value=pd.to_datetime("2025-12-31"))
 
-        st.dataframe(df_filtrado)
+    df_c100["DT_DOC"] = pd.to_datetime(df_c100["DT_DOC"], errors="coerce")
+    notas_validas = df_c100[
+        (df_c100["DT_DOC"] >= pd.to_datetime(data_inicio)) &
+        (df_c100["DT_DOC"] <= pd.to_datetime(data_fim))
+    ]["NUM_DOC"].unique()
 
-        # Gráfico de CFOPs
-        st.subheader("📊 Créditos por CFOP")
-        if not df_credito.empty and 8 in df_credito.columns:
-            cfop_counts = df_credito[8].value_counts().sort_values(ascending=False)
-            fig, ax = plt.subplots()
-            cfop_counts.plot(kind='bar', ax=ax, color='teal')
-            ax.set_title("CFOPs que mais geram crédito")
-            ax.set_xlabel("CFOP")
-            ax.set_ylabel("Quantidade de Itens")
-            st.pyplot(fig)
-        else:
-            st.warning("Nenhum CFOP encontrado para gerar o gráfico.")
+    df_filtrado = df_credito[df_credito["NUM_ITEM"].isin(notas_validas)]
+    if cfop_selecionado:
+        df_filtrado = df_filtrado[df_filtrado["CFOP"].isin(cfop_selecionado)]
+    if cst_selecionado:
+        df_filtrado = df_filtrado[df_filtrado["CST_PIS"].isin(cst_selecionado)]
 
-        # Notas fiscais que geraram crédito
-        st.subheader("📑 Notas fiscais com itens que geram crédito")
-        notas_com_credito = df_credito[2].unique()
-        df_notas_com_credito = df_c100[df_c100[2].isin(notas_com_credito)]
-        st.dataframe(df_notas_com_credito)
+    st.dataframe(df_filtrado)
 
-        # Download TXT e Excel dos itens com crédito
-        txt_credito = gerar_txt_credito(df_credito)
-        st.download_button(
-            label="📄 Baixar TXT com itens que geram crédito",
-            data=txt_credito,
-            file_name="AutoTributo_credito.txt",
-            mime="text/plain"
-        )
+    # Gráfico de CFOPs
+    st.subheader("📊 Créditos por CFOP")
+    cfop_counts = df_credito["CFOP"].value_counts().sort_values(ascending=False)
+    fig, ax = plt.subplots()
+    cfop_counts.plot(kind='bar', ax=ax, color='teal')
+    ax.set_title("CFOPs que mais geram crédito")
+    ax.set_xlabel("CFOP")
+    ax.set_ylabel("Quantidade de Itens")
+    st.pyplot(fig)
 
-        excel_credito = gerar_excel_credito(df_credito)
-        st.download_button(
-            label="📥 Baixar Excel com itens que geram crédito",
-            data=excel_credito,
-            file_name="AutoTributo_credito.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+    # Notas fiscais
 
 
 
