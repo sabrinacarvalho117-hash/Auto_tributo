@@ -114,15 +114,32 @@ def calcular_credito(df):
             aliq_cofins = float(row[12]) if row[12] else 0
             credito = valor_item * (aliq_pis + aliq_cofins) / 100
             df.at[i, "valor_credito"] = round(credito, 2)
-        except:
-            continue
-    return df
-df_credito = df_c170[df_c170["credito_permitido"] == True]
-df_credito = calcular_credito(df_credito)
-total_credito = df_credito["valor_credito"].sum()
+# Aplicar regras de crédito
+df_c170 = aplicar_regras_credito(df_c170)
 
-st.metric(label="💸 Crédito Fiscal Estimado (PIS + COFINS)", value=f"R$ {total_credito:,.2f}")
-st.dataframe(df_credito)
+# Filtrar itens com crédito permitido
+if "credito_permitido" in df_c170.columns:
+    df_credito = df_c170[df_c170["credito_permitido"] == True]
+
+    # Calcular valor estimado de crédito
+    def calcular_credito(df):
+        df["valor_credito"] = 0.0
+        for i, row in df.iterrows():
+            try:
+                valor_item = float(row[7]) if row[7] else 0
+                aliq_pis = float(row[11]) if row[11] else 0
+                aliq_cofins = float(row[12]) if row[12] else 0
+                credito = valor_item * (aliq_pis + aliq_cofins) / 100
+                df.at[i, "valor_credito"] = round(credito, 2)
+            except:
+                continue
+        return df
+
+    df_credito = calcular_credito(df_credito)
+    total_credito = df_credito["valor_credito"].sum()
+
+    st.metric(label="💸 Crédito Fiscal Estimado (PIS + COFINS)", value=f"R$ {total_credito:,.2f}")
+    st.dataframe(df_credito)
 
 
 
