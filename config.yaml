@@ -3,7 +3,7 @@ credentials:
     sabrina:
       email: sabrinacarvalho117@gmail.com
       name: Sabrina
-      password: "$2b$12$W9uJHqv3YzK1ZzK3nYxgUeKZJzG9gQzYxK1ZzK3nYxgUeKZJzG9gQz"
+      password:password: \"$2b$12$W9uJHqv3YzK1ZzK3nYxgUeKZJzG9gQzYxK1ZzK3nYxgUeKZJzG9gQz\"
 
 cookie:
   expiry_days: 30
