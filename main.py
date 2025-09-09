@@ -61,11 +61,13 @@ st.download_button(
     st.write(f"🔹 Notas fiscais encontradas (C100): {len(dados['C100'])}")
     st.write(f"🔹 Itens de nota (C170): {len(dados['C170'])}")
 
+
     if st.checkbox("Mostrar blocos C100"):
         st.write(dados["C100"])
 
     if st.checkbox("Mostrar blocos C170"):
         st.write(dados["C170"])
+
 
 
 
