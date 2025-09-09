@@ -16,14 +16,14 @@ authenticator = stauth.Authenticate(
     config['preauthorized']
 )
 
-# Tela de login
-name, authentication_status, username = authenticator.login("Login", "main")
+# Tela de login (localização deve ser 'main', 'sidebar' ou 'unrendered')
+authenticator.login(location='main')
 
 # Verificar status
-if authentication_status:
-    st.success(f"Bem-vinda, {name}!")
+if st.session_state["authentication_status"]:
+    st.success(f"Bem-vinda, {st.session_state['name']}!")
     st.write("Você está logada no AutoTributo.")
-elif authentication_status is False:
+elif st.session_state["authentication_status"] is False:
     st.error("Usuário ou senha incorretos.")
-elif authentication_status is None:
+elif st.session_state["authentication_status"] is None:
     st.warning("Por favor, insira suas credenciais.")
