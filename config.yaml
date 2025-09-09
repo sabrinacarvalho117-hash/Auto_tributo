@@ -1,15 +1,31 @@
-credentials:
-  usernames:
-    sabrina:
-      email: sabrinacarvalho117@gmail.com
-      name: Sabrina
-      password: 12345  # será criptografada automaticamente
+import streamlit as st
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
 
-cookie:
-  expiry_days: 30
-  key: segredo_sabrina
-  name: auto_tributo_login
+# 🔽 Carrega o arquivo de configuração
+with open('config.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
 
-preauthorized:
-  emails:
-    - sabrinacarvalho117@gmail.com
+# 🔐 Cria o autenticador
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
+
+# 🧑 Login
+authenticator.login("Login")
+
+# ✅ Verifica status
+if st.session_state["authentication_status"]:
+    st.success(f"Bem-vinda, {st.session_state['name']}!")
+    st.markdown("Você está autenticada e pode acessar todas as funcionalidades do AutoTributo.")
+
+elif st.session_state["authentication_status"] is False:
+    st.error("Usuário ou senha incorretos.")
+
+elif st.session_state["authentication_status"] is None:
+    st.warning("Por favor, insira suas credenciais.")
