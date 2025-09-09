@@ -36,6 +36,20 @@ def aplicar_regras_credito(df):
             continue
     return df
 
+# Função para calcular crédito estimado
+def calcular_credito(df):
+    df["valor_credito"] = 0.0
+    for i, row in df.iterrows():
+        try:
+            valor_item = float(row[7]) if row[7] else 0
+            aliq_pis = float(row[11]) if row[11] else 0
+            aliq_cofins = float(row[12]) if row[12] else 0
+            credito = valor_item * (aliq_pis + aliq_cofins) / 100
+            df.at[i, "valor_credito"] = round(credito, 2)
+        except:
+            continue
+    return df
+
 # Função para gerar Excel com os dados
 def gerar_excel(df1, df2):
     output = io.BytesIO()
@@ -65,8 +79,6 @@ if uploaded_file is not None:
     df_c100 = pd.DataFrame(dados["C100"]) if dados["C100"] else pd.DataFrame()
     df_c170 = pd.DataFrame(dados["C170"]) if dados["C170"] else pd.DataFrame()
 
-    df_c170 = aplicar_regras_credito(df_c170)
-
     st.success("Arquivo lido com sucesso!")
     st.subheader("📄 Visualização dos dados")
 
@@ -93,53 +105,28 @@ if uploaded_file is not None:
     if st.checkbox("Mostrar blocos C170"):
         st.write(dados["C170"])
 
-    st.subheader("💰 Itens com crédito permitido de PIS/COFINS")
-    df_credito = df_c170[df_c170["credito_permitido"] == True]
-    st.dataframe(df_credito)
+    # Aplicar regras de crédito
+    df_c170 = aplicar_regras_credito(df_c170)
 
-    txt_credito = gerar_txt_credito(df_credito)
-    st.download_button(
-        label="📄 Baixar TXT com itens que geram crédito",
-        data=txt_credito,
-        file_name="AutoTributo_credito.txt",
-        mime="text/plain"
-    )
-# Calcular crédito estimado
-def calcular_credito(df):
-    df["valor_credito"] = 0.0
-    for i, row in df.iterrows():
-        try:
-            valor_item = float(row[7]) if row[7] else 0  # coluna VL_ITEM
-            aliq_pis = float(row[11]) if row[11] else 0
-            aliq_cofins = float(row[12]) if row[12] else 0
-            credito = valor_item * (aliq_pis + aliq_cofins) / 100
-            df.at[i, "valor_credito"] = round(credito, 2)
-# Aplicar regras de crédito
-df_c170 = aplicar_regras_credito(df_c170)
+    # Filtrar itens com crédito permitido
+    if "credito_permitido" in df_c170.columns:
+        df_credito = df_c170[df_c170["credito_permitido"] == True]
+        df_credito = calcular_credito(df_credito)
+        total_credito = df_credito["valor_credito"].sum()
 
-# Filtrar itens com crédito permitido
-if "credito_permitido" in df_c170.columns:
-    df_credito = df_c170[df_c170["credito_permitido"] == True]
+        st.subheader("💰 Itens com crédito permitido de PIS/COFINS")
+        st.metric(label="💸 Crédito Fiscal Estimado (PIS + COFINS)", value=f"R$ {total_credito:,.2f}")
+        st.dataframe(df_credito)
 
-    # Calcular valor estimado de crédito
-    def calcular_credito(df):
-        df["valor_credito"] = 0.0
-        for i, row in df.iterrows():
-            try:
-                valor_item = float(row[7]) if row[7] else 0
-                aliq_pis = float(row[11]) if row[11] else 0
-                aliq_cofins = float(row[12]) if row[12] else 0
-                credito = valor_item * (aliq_pis + aliq_cofins) / 100
-                df.at[i, "valor_credito"] = round(credito, 2)
-            except:
-                continue
-        return df
+        txt_credito = gerar_txt_credito(df_credito)
+        st.download_button(
+            label="📄 Baixar TXT com itens que geram crédito",
+            data=txt_credito,
+            file_name="AutoTributo_credito.txt",
+            mime="text/plain"
+        )
 
-    df_credito = calcular_credito(df_credito)
-    total_credito = df_credito["valor_credito"].sum()
 
-    st.metric(label="💸 Crédito Fiscal Estimado (PIS + COFINS)", value=f"R$ {total_credito:,.2f}")
-    st.dataframe(df_credito)
 
 
 
