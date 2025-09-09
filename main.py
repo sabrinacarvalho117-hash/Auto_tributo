@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import io
@@ -90,7 +91,6 @@ def aplicar_regras_credito(df):
             aliq_pis = float(row[11]) if row[11] else 0
             aliq_cofins = float(row[12]) if row[12] else 0
 
-           # Aplicar regras de crédito de PIS/COFINS
 # Aplicar regras de crédito de PIS/COFINS
 def aplicar_regras_credito(df):
     df["credito_permitido"] = False
@@ -101,6 +101,18 @@ def aplicar_regras_credito(df):
             cst_cofins = row[10]
             aliq_pis = float(row[11]) if row[11] else 0
             aliq_cofins = float(row[12]) if row[12] else 0
+
+            if (
+                str(cfop).startswith(("1", "2", "3")) and
+                str(cst_pis) in ["50", "51", "52", "53"] and
+                str(cst_cofins) in ["50", "51", "52", "53"] and
+                (aliq_pis > 0 or aliq_cofins > 0)
+            ):
+                df.at[i, "credito_permitido"] = True
+        except Exception:
+            continue
+    return df
+
 
             if (
                 str(cfop).startswith(("1", "2", "3")) and
@@ -165,6 +177,7 @@ st.download_button(
     file_name="AutoTributo_credito.txt",
     mime="text/plain"
 )
+
 
 
 
