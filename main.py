@@ -104,6 +104,25 @@ if uploaded_file is not None:
         file_name="AutoTributo_credito.txt",
         mime="text/plain"
     )
+# Calcular crédito estimado
+def calcular_credito(df):
+    df["valor_credito"] = 0.0
+    for i, row in df.iterrows():
+        try:
+            valor_item = float(row[7]) if row[7] else 0  # coluna VL_ITEM
+            aliq_pis = float(row[11]) if row[11] else 0
+            aliq_cofins = float(row[12]) if row[12] else 0
+            credito = valor_item * (aliq_pis + aliq_cofins) / 100
+            df.at[i, "valor_credito"] = round(credito, 2)
+        except:
+            continue
+    return df
+
+df_credito = calcular_credito(df_credito)
+total_credito = df_credito["valor_credito"].sum()
+
+st.metric(label="💸 Crédito Fiscal Estimado (PIS + COFINS)", value=f"R$ {total_credito:,.2f}")
+
 
 
 
