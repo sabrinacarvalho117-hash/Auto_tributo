@@ -1,18 +1,22 @@
 import streamlit as st
 
 def ler_arquivo_sped(uploaded_file):
-    blocos = {
-        "C100": [],
-        "C170": []
-    }
+    blocos = { "C100": [], "C170": [] }
 
-    for linha in uploaded_file:
-        linha = linha.decode("utf-8").strip()
-        partes = linha.split("|")
+    conteudo = uploaded_file.read().decode("utf-8")
+    for linha in conteudo.splitlines():
+        partes = linha.strip().split("|")
         if len(partes) > 1:
             tipo_bloco = partes[1]
             if tipo_bloco in blocos:
                 blocos[tipo_bloco].append(partes)
+
+    return blocos
+
+# Interface Streamlit
+st.set_page_config(page_title="AutoTributo", layout="wide")
+st.title("AutoTributo – Leitor de Arquivo SPED")
+
 
     return blocos
 # Interface Streamlit
@@ -65,6 +69,7 @@ def gerar_excel(df1, df2):
 
     if st.checkbox("Mostrar blocos C170"):
         st.write(dados["C170"])
+
 
 
 
