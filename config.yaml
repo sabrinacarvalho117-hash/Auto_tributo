@@ -1,0 +1,15 @@
+credentials:
+  usernames:
+    sabrina:
+      email: sabrinacarvalho117@gmail.com
+      name: Sabrina
+      password: 12345  # será criptografada automaticamente
+
+cookie:
+  expiry_days: 30
+  key: segredo_sabrina
+  name: auto_tributo_login
+
+preauthorized:
+  emails:
+    - sabrinacarvalho117@gmail.com
