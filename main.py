@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 import io
 
 # Função para ler o arquivo SPED
@@ -50,12 +51,19 @@ def calcular_credito(df):
             continue
     return df
 
-# Função para gerar Excel com os dados
+# Função para gerar Excel
 def gerar_excel(df1, df2):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df1.to_excel(writer, sheet_name='C100', index=False)
         df2.to_excel(writer, sheet_name='C170', index=False)
+    return output.getvalue()
+
+# Função para gerar Excel com crédito
+def gerar_excel_credito(df):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='Itens com Crédito', index=False)
     return output.getvalue()
 
 # Função para gerar TXT com os itens que têm crédito permitido
@@ -96,15 +104,6 @@ if uploaded_file is not None:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-    st.write(f"🔹 Notas fiscais encontradas (C100): {len(dados['C100'])}")
-    st.write(f"🔹 Itens de nota (C170): {len(dados['C170'])}")
-
-    if st.checkbox("Mostrar blocos C100"):
-        st.write(dados["C100"])
-
-    if st.checkbox("Mostrar blocos C170"):
-        st.write(dados["C170"])
-
     # Aplicar regras de crédito
     df_c170 = aplicar_regras_credito(df_c170)
 
@@ -116,8 +115,43 @@ if uploaded_file is not None:
 
         st.subheader("💰 Itens com crédito permitido de PIS/COFINS")
         st.metric(label="💸 Crédito Fiscal Estimado (PIS + COFINS)", value=f"R$ {total_credito:,.2f}")
-        st.dataframe(df_credito)
 
+        # Filtros interativos
+        st.subheader("🔍 Filtros Interativos")
+        cfop_opcoes = sorted(df_credito[8].dropna().unique())
+        cfop_selecionado = st.multiselect("Filtrar por CFOP", cfop_opcoes)
+
+        cst_opcoes = sorted(df_credito[9].dropna().unique())
+        cst_selecionado = st.multiselect("Filtrar por CST PIS", cst_opcoes)
+
+        df_filtrado = df_credito.copy()
+        if cfop_selecionado:
+            df_filtrado = df_filtrado[df_filtrado[8].isin(cfop_selecionado)]
+        if cst_selecionado:
+            df_filtrado = df_filtrado[df_filtrado[9].isin(cst_selecionado)]
+
+        st.dataframe(df_filtrado)
+
+        # Gráfico de CFOPs
+        st.subheader("📊 Créditos por CFOP")
+        if not df_credito.empty and 8 in df_credito.columns:
+            cfop_counts = df_credito[8].value_counts().sort_values(ascending=False)
+            fig, ax = plt.subplots()
+            cfop_counts.plot(kind='bar', ax=ax, color='teal')
+            ax.set_title("CFOPs que mais geram crédito")
+            ax.set_xlabel("CFOP")
+            ax.set_ylabel("Quantidade de Itens")
+            st.pyplot(fig)
+        else:
+            st.warning("Nenhum CFOP encontrado para gerar o gráfico.")
+
+        # Notas fiscais que geraram crédito
+        st.subheader("📑 Notas fiscais com itens que geram crédito")
+        notas_com_credito = df_credito[2].unique()
+        df_notas_com_credito = df_c100[df_c100[2].isin(notas_com_credito)]
+        st.dataframe(df_notas_com_credito)
+
+        # Download TXT e Excel dos itens com crédito
         txt_credito = gerar_txt_credito(df_credito)
         st.download_button(
             label="📄 Baixar TXT com itens que geram crédito",
@@ -125,18 +159,15 @@ if uploaded_file is not None:
             file_name="AutoTributo_credito.txt",
             mime="text/plain"
         )
-import matplotlib.pyplot as plt
 
-# Gráfico de CFOPs que mais geram crédito
-st.subheader("📊 Créditos por CFOP")
+        excel_credito = gerar_excel_credito(df_credito)
+        st.download_button(
+            label="📥 Baixar Excel com itens que geram crédito",
+            data=excel_credito,
+            file_name="AutoTributo_credito.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
-cfop_counts = df_credito[8].value_counts().sort_values(ascending=False)
-fig, ax = plt.subplots()
-cfop_counts.plot(kind='bar', ax=ax, color='teal')
-ax.set_title("CFOPs que mais geram crédito")
-ax.set_xlabel("CFOP")
-ax.set_ylabel("Quantidade de Itens")
-st.pyplot(fig)
 
 
 
