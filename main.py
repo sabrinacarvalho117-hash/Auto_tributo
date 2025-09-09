@@ -125,6 +125,19 @@ if uploaded_file is not None:
             file_name="AutoTributo_credito.txt",
             mime="text/plain"
         )
+import matplotlib.pyplot as plt
+
+# Gráfico de CFOPs que mais geram crédito
+st.subheader("📊 Créditos por CFOP")
+
+cfop_counts = df_credito[8].value_counts().sort_values(ascending=False)
+fig, ax = plt.subplots()
+cfop_counts.plot(kind='bar', ax=ax, color='teal')
+ax.set_title("CFOPs que mais geram crédito")
+ax.set_xlabel("CFOP")
+ax.set_ylabel("Quantidade de Itens")
+st.pyplot(fig)
+
 
 
 
