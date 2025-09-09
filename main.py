@@ -87,6 +87,24 @@ df_c170 = aplicar_regras_credito(df_c170)
 st.subheader("💰 Itens com crédito permitido de PIS/COFINS")
 df_credito = df_c170[df_c170["credito_permitido"] == True]
 st.dataframe(df_credito)
+# Gerar novo .txt com os itens que têm crédito permitido
+def gerar_txt_credito(df):
+    linhas_formatadas = []
+    for linha in df.values:
+        partes = [str(campo) if campo is not None else "" for campo in linha]
+        linha_formatada = "|" + "|".join(partes) + "|"
+        linhas_formatadas.append(linha_formatada)
+    return "\n".join(linhas_formatadas)
+
+txt_credito = gerar_txt_credito(df_credito)
+
+st.download_button(
+    label="📄 Baixar TXT com itens que geram crédito",
+    data=txt_credito,
+    file_name="AutoTributo_credito.txt",
+    mime="text/plain"
+)
+
 
 
 
