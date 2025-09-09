@@ -15,7 +15,6 @@ def ler_arquivo_sped(uploaded_file):
                 blocos[tipo_bloco].append(partes)
 
     return blocos
-
 # Interface Streamlit
 st.set_page_config(page_title="AutoTributo", layout="wide")
 st.title("AutoTributo – Leitor de Arquivo SPED")
@@ -66,4 +65,5 @@ st.download_button(
 
     if st.checkbox("Mostrar blocos C170"):
         st.write(dados["C170"])
+
 
