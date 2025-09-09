@@ -117,12 +117,12 @@ def calcular_credito(df):
         except:
             continue
     return df
-
+df_credito = df_c170[df_c170["credito_permitido"] == True]
 df_credito = calcular_credito(df_credito)
 total_credito = df_credito["valor_credito"].sum()
 
 st.metric(label="💸 Crédito Fiscal Estimado (PIS + COFINS)", value=f"R$ {total_credito:,.2f}")
-
+st.dataframe(df_credito)
 
 
 
