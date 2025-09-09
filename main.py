@@ -28,8 +28,9 @@ if uploaded_file is not None:
 import io
 
 # Transformar blocos em DataFrames
-df_c100 = pd.DataFrame(dados["C100"])
-df_c170 = pd.DataFrame(dados["C170"])
+df_c100 = pd.DataFrame(dados["C100"]) if dados["C100"] else pd.DataFrame()
+df_c170 = pd.DataFrame(dados["C170"]) if dados["C170"] else pd.DataFrame()
+
 
 st.subheader("📄 Visualização dos dados")
 
@@ -65,5 +66,6 @@ st.download_button(
 
     if st.checkbox("Mostrar blocos C170"):
         st.write(dados["C170"])
+
 
 
