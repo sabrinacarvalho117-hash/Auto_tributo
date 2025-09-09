@@ -49,14 +49,13 @@ def gerar_excel(df1, df2):
     return output.getvalue()
 
 # Botão de download
-excel_bytes = gerar_excel(df_c100, df_c170)
-st.download_button(
-    label="📥 Baixar Excel com os dados",
-    data=excel_bytes,
-    file_name="AutoTributo_dados.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
-
+    excel_bytes = gerar_excel(df_c100, df_c170)
+    st.download_button(
+        label="📥 Baixar Excel com os dados",
+        data=excel_bytes,
+        file_name="AutoTributo_dados.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
     st.write(f"🔹 Notas fiscais encontradas (C100): {len(dados['C100'])}")
     st.write(f"🔹 Itens de nota (C170): {len(dados['C170'])}")
@@ -66,6 +65,8 @@ st.download_button(
 
     if st.checkbox("Mostrar blocos C170"):
         st.write(dados["C170"])
+
+
 
 
 
