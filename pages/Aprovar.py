@@ -4,7 +4,6 @@ import urllib.parse
 st.set_page_config(page_title="Aprovar Acesso", page_icon="✅")
 st.title("✅ Aprovação Automática")
 
-# Captura segura do parâmetro da URL
 query_params = st.query_params
 email = query_params.get("email", [None])[0]
 
