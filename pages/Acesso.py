@@ -1,7 +1,7 @@
 import streamlit as st
 
 st.set_page_config(page_title="Acesso", page_icon="🔐")
-st.title("🔐 Login Automático")
+st.title("🔐 Login ou Cadastro")
 
 email = st.text_input("Digite seu e-mail")
 
@@ -16,7 +16,7 @@ if email:
 
     if email in aprovados:
         st.session_state.usuario_logado = True
-        st.success("Login aprovado! Você já pode acessar o sistema.")
+        st.success("Login aprovado! Vá para a página principal.")
         st.page_link("Main.py", label="Ir para o sistema", icon="➡️")
     else:
         with open("aprovados.txt", "a") as f:
