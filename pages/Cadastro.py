@@ -16,7 +16,8 @@ if st.button("Solicitar permissão"):
         email_encoded = urllib.parse.quote(email)
 
         # Gerar link de aprovação automática
-        link_aprovacao = f"https://autotributo.streamlit.app/Aprovar?email={email_encoded}"
+link_aprovacao = f"https://autotributo-6hnqwkqzf68hj4i583pjyw.streamlit.app/Aprovar?email={email_encoded}"
+
 
         # Criar mensagem de e-mail
         msg = EmailMessage()
