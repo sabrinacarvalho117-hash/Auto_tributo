@@ -1,11 +1,13 @@
 import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import io
 
+# Verifica se o usuário está logado
 if "usuario_logado" not in st.session_state or not st.session_state.usuario_logado:
     st.warning("Você precisa fazer login antes de acessar esta página.")
     st.stop()
 
-
-# Interface Streamlit
 st.set_page_config(page_title="AutoTributo", layout="wide")
 st.title("AutoTributo – Leitor de Arquivo SPED")
 
@@ -24,7 +26,6 @@ if uploaded_file is not None:
     df_c100 = pd.DataFrame(blocos["C100"]) if blocos["C100"] else pd.DataFrame()
     df_c170 = pd.DataFrame(blocos["C170"]) if blocos["C170"] else pd.DataFrame()
 
-    # Renomear colunas
     df_c100.columns = [
         "REG", "IND_OPER", "IND_EMIT", "COD_PART", "COD_MOD", "COD_SIT", "SER", "NUM_DOC",
         "CHV_NFE", "DT_DOC", "DT_ENT", "VL_DOC", "IND_PGTO", "VL_DESC", "VL_ABAT_NT", "VL_MERC",
@@ -43,7 +44,6 @@ if uploaded_file is not None:
     st.write("Bloco C170 – Itens das NFes")
     st.dataframe(df_c170)
 
-    # Aplicar regras
     df_c170["credito_permitido"] = df_c170.apply(
         lambda row: str(row["CFOP"]).startswith(("1", "2", "3")) and
                     str(row["CST_PIS"]) in ["50", "51", "52", "53"] and
@@ -64,7 +64,6 @@ if uploaded_file is not None:
     st.subheader("💰 Itens com crédito permitido de PIS/COFINS")
     st.metric(label="💸 Crédito Fiscal Estimado", value=f"R$ {total_credito:,.2f}")
 
-    # Filtros
     st.subheader("🔍 Filtros Interativos")
     cfop_opcoes = sorted(df_credito["CFOP"].dropna().unique())
     cfop_selecionado = st.multiselect("Filtrar por CFOP", cfop_opcoes)
@@ -89,7 +88,6 @@ if uploaded_file is not None:
 
     st.dataframe(df_filtrado)
 
-    # Gráfico
     st.subheader("📊 Créditos por CFOP")
     cfop_counts = df_credito["CFOP"].value_counts().sort_values(ascending=False)
     fig, ax = plt.subplots()
@@ -99,7 +97,6 @@ if uploaded_file is not None:
     ax.set_ylabel("Quantidade de Itens")
     st.pyplot(fig)
 
-    # Exportar Excel
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df_credito.to_excel(writer, sheet_name='Itens com Crédito', index=False)
@@ -109,4 +106,3 @@ if uploaded_file is not None:
         file_name="AutoTributo_creditos.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
