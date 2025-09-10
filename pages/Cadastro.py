@@ -21,11 +21,12 @@ if st.button("Solicitar permissão"):
         msg['Subject'] = 'Solicitação de Permissão - AutoTributo'
         msg['From'] = 'autotributo098@gmail.com'
         msg['To'] = 'sabrinacarvalho117@gmail.com'
-        msg.set_content(
+        conteudo = (
             f"Um usuário solicitou acesso ao AutoTributo.\n\n"
             f"E-mail: {email}\n\n"
             f"Para aprovar automaticamente, clique neste link:\n{link_aprovacao}"
         )
+        msg.set_content(conteudo)
 
         try:
             with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
@@ -37,7 +38,3 @@ if st.button("Solicitar permissão"):
     else:
         st.warning("Digite seu e-mail antes de solicitar.")
 
-
-Para aprovar automaticamente, clique neste link:
-{link_aprovacao}
-""")
