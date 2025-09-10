@@ -33,3 +33,6 @@ if st.button("Solicitar permissão"):
             st.error("Erro ao enviar solicitação. Verifique as configurações.")
     else:
         st.warning("Digite seu e-mail antes de solicitar.")
+# Salvar e-mail em arquivo de solicitações
+with open("solicitacoes.txt", "a") as f:
+    f.write(email + "\n")
