@@ -12,8 +12,10 @@ email = st.text_input("Digite seu e-mail")
 # Botão de envio
 if st.button("Solicitar permissão"):
     if email:
-        # Gerar link de aprovação automática
+        # Codificar o e-mail para uso na URL
         email_encoded = urllib.parse.quote(email)
+
+        # Gerar link de aprovação automática
         link_aprovacao = f"https://autotributo.streamlit.app/Aprovar?email={email_encoded}"
 
         # Criar mensagem de e-mail
@@ -21,21 +23,18 @@ if st.button("Solicitar permissão"):
         msg['Subject'] = 'Solicitação de Permissão - AutoTributo'
         msg['From'] = 'autotributo098@gmail.com'
         msg['To'] = 'sabrinacarvalho117@gmail.com'
-        conteudo = (
+        msg.set_content(
             f"Um usuário solicitou acesso ao AutoTributo.\n\n"
             f"E-mail: {email}\n\n"
             f"Para aprovar automaticamente, clique neste link:\n{link_aprovacao}"
         )
-        msg.set_content(conteudo)
 
         try:
             with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-                smtp.login('autotributo098@gmail.com', 'smvmxdncsdprzwqi')  # sua senha de app
+                smtp.login('autotributo098@gmail.com', 'smvmxdncsdprzwqi')
                 smtp.send_message(msg)
             st.success("Solicitação enviada! Aguarde aprovação.")
         except Exception as e:
             st.error("Erro ao enviar solicitação. Verifique as configurações.")
     else:
         st.warning("Digite seu e-mail antes de solicitar.")
-link_aprovacao = f"https://autotributo.streamlit.app/Aprovar?email={email_encoded}"
-
