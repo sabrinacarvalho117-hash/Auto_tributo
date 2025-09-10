@@ -36,3 +36,16 @@ if st.button("Solicitar permissão"):
 # Salvar e-mail em arquivo de solicitações
 with open("solicitacoes.txt", "a") as f:
     f.write(email + "\n")
+# Gerar link de aprovação
+link_aprovacao = f"https://autotributo.streamlit.app/Aprovar?email={email}"
+
+msg.set_content(f"""
+Um usuário solicitou acesso ao AutoTributo.
+
+E-mail: {email}
+
+Você pode aprovar ou negar manualmente.
+
+Para aprovar automaticamente, clique neste link:
+{link_aprovacao}
+""")
