@@ -1,5 +1,4 @@
 import streamlit as st
-import urllib.parse
 
 st.set_page_config(page_title="Acesso", page_icon="🔐")
 st.title("🔐 Login ou Cadastro")
@@ -19,7 +18,7 @@ if st.button("Entrar"):
         if email in aprovados:
             st.session_state.usuario_logado = True
             st.success("Login aprovado! Vá para a página principal.")
-            st.page_link("main.py", label="Ir para o sistema", icon="➡️")
+            st.page_link("Main.py", label="Ir para o sistema", icon="➡️")
         else:
             with open("aprovados.txt", "a") as f:
                 f.write(email + "\n")
