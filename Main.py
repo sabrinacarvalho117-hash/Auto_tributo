@@ -86,4 +86,29 @@ if uploaded_file is not None:
 
     df_filtrado = df_credito[df_credito["NUM_ITEM"].isin(notas_validas)]
     if cfop_selecionado:
-        df_filtrado = df
+        df_filtrado = df_filtrado[df_filtrado["CFOP"].isin(cfop_selecionado)]
+    if cst_selecionado:
+        df_filtrado = df_filtrado[df_filtrado["CST_PIS"].isin(cst_selecionado)]
+
+    st.dataframe(df_filtrado)
+
+    # Gráfico
+    st.subheader("📊 Créditos por CFOP")
+    cfop_counts = df_credito["CFOP"].value_counts().sort_values(ascending=False)
+    fig, ax = plt.subplots()
+    cfop_counts.plot(kind='bar', ax=ax, color='teal')
+    ax.set_title("CFOPs que mais geram crédito")
+    ax.set_xlabel("CFOP")
+    ax.set_ylabel("Quantidade de Itens")
+    st.pyplot(fig)
+
+    # Exportar Excel
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df_credito.to_excel(writer, sheet_name='Itens com Crédito', index=False)
+    st.download_button(
+        label="📥 Baixar Excel com os dados",
+        data=output.getvalue(),
+        file_name="AutoTributo_creditos.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
