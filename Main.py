@@ -8,6 +8,7 @@ if "usuario_logado" not in st.session_state or not st.session_state.usuario_loga
     st.warning("Você precisa fazer login antes de acessar esta página.")
     st.stop()
 
+
 # Funções principais
 def ler_arquivo_sped(uploaded_file):
     blocos = { "C100": [], "C170": [] }
@@ -178,6 +179,7 @@ import streamlit as st
 if "usuario_logado" not in st.session_state or not st.session_state.usuario_logado:
     st.warning("Você precisa fazer login antes de acessar esta página.")
     st.stop()
+
 
 
 
