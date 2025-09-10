@@ -37,4 +37,5 @@ if st.button("Solicitar permissão"):
             st.error("Erro ao enviar solicitação. Verifique as configurações.")
     else:
         st.warning("Digite seu e-mail antes de solicitar.")
+link_aprovacao = f"https://autotributo.streamlit.app/Aprovar?email={email_encoded}"
 
