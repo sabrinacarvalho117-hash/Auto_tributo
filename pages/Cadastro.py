@@ -3,35 +3,33 @@ import smtplib
 from email.message import EmailMessage
 
 st.set_page_config(page_title="Cadastro", page_icon="📝")
-st.title("📝 Solicitação de Cadastro")
+st.title("📝 Solicitação de Acesso")
 
-# Campos de entrada
+# Campo de entrada
 email = st.text_input("Digite seu e-mail")
-senha = st.text_input("Crie uma senha", type="password")
 
 # Botão de envio
-if st.button("Solicitar acesso"):
-    if email and senha:
+if st.button("Solicitar permissão"):
+    if email:
         # Criar mensagem de e-mail
         msg = EmailMessage()
-        msg['Subject'] = 'Solicitação de Cadastro - AutoTributo'
+        msg['Subject'] = 'Solicitação de Permissão - AutoTributo'
         msg['From'] = 'autotributo098@gmail.com'
         msg['To'] = 'sabrinacarvalho117@gmail.com'
         msg.set_content(f"""
-        Novo usuário solicitou acesso ao AutoTributo:
+        Um usuário solicitou acesso ao AutoTributo.
 
         E-mail: {email}
-        Senha: {senha}
 
-        Você pode aprovar manualmente adicionando ao sistema.
+        Você pode aprovar ou negar manualmente.
         """)
 
         try:
             with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-                smtp.login('autotributo098@gmail.com', 'lferkdiianyfapf')
+                smtp.login('autotributo098@gmail.com', 'smvmxdncsdprzwqi')  # sua senha de app
                 smtp.send_message(msg)
             st.success("Solicitação enviada! Aguarde aprovação por e-mail.")
         except Exception as e:
-            st.error("Erro ao enviar e-mail. Verifique as configurações.")
+            st.error("Erro ao enviar solicitação. Verifique as configurações.")
     else:
-        st.warning("Preencha todos os campos antes de solicitar.")
+        st.warning("Digite seu e-mail antes de solicitar.")
