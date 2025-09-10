@@ -167,6 +167,13 @@ if uploaded_file is not None:
     st.pyplot(fig)
 
     # Notas fiscais
+import streamlit as st
+
+# Verifica se o usuário está logado
+if "usuario_logado" not in st.session_state or not st.session_state.usuario_logado:
+    st.warning("Você precisa fazer login antes de acessar esta página.")
+    st.stop()
+
 
 
 
