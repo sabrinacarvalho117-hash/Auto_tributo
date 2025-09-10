@@ -1,32 +1,26 @@
 import streamlit as st
+import urllib.parse
 
 st.set_page_config(page_title="Aprovar Acesso", page_icon="✅")
-st.title("✅ Aprovação de Acesso")
+st.title("✅ Aprovação Automática")
 
-# Carregar solicitações
-try:
-    with open("solicitacoes.txt", "r") as f:
-        solicitacoes = list(set([linha.strip() for linha in f if linha.strip()]))
-except FileNotFoundError:
-    solicitacoes = []
+# Ler parâmetro da URL
+query_params = st.experimental_get_query_params()
+email = query_params.get("email", [None])[0]
 
-# Carregar aprovados
-try:
-    with open("aprovados.txt", "r") as f:
-        aprovados = set([linha.strip() for linha in f if linha.strip()])
-except FileNotFoundError:
-    aprovados = set()
+if email:
+    email = urllib.parse.unquote(email)
+    try:
+        with open("aprovados.txt", "r") as f:
+            aprovados = [linha.strip() for linha in f]
+    except FileNotFoundError:
+        aprovados = []
 
-# Mostrar solicitações pendentes
-pendentes = [email for email in solicitacoes if email not in aprovados]
-
-if pendentes:
-    for email in pendentes:
-        col1, col2 = st.columns([3, 1])
-        col1.write(email)
-        if col2.button("Aprovar", key=email):
-            with open("aprovados.txt", "a") as f:
-                f.write(email + "\n")
-            st.success(f"{email} aprovado!")
+    if email not in aprovados:
+        with open("aprovados.txt", "a") as f:
+            f.write(email + "\n")
+        st.success(f"E-mail {email} aprovado com sucesso!")
+    else:
+        st.info(f"E-mail {email} já está aprovado.")
 else:
-    st.info("Nenhuma solicitação pendente.")
+    st.warning("Nenhum e-mail fornecido para aprovação.")
