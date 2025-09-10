@@ -35,3 +35,5 @@ if st.button("Solicitar acesso"):
             st.error("Erro ao enviar e-mail. Verifique as configurações.")
     else:
         st.warning("Preencha todos os campos antes de solicitar.")
+
+        st.warning("Preencha todos os campos antes de solicitar.")
