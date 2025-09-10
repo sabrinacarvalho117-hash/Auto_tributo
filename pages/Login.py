@@ -1,29 +1,25 @@
 import streamlit as st
-import streamlit_authenticator as stauth
-import yaml
-from yaml.loader import SafeLoader
 
-# Carregar config.yaml
-with open('config.yaml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
+st.set_page_config(page_title="Login", page_icon="🔐")
+st.title("🔐 Login")
 
-# Inicializar autenticação
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days'],
-    config['preauthorized']
-)
+# Lista de e-mails autorizados
+emails_autorizados = [
+    "usuario1@email.com",
+    "usuario2@email.com",
+    "sabrinacarvalho117@gmail.com"
+]
 
-# Tela de login (localização deve ser 'main', 'sidebar' ou 'unrendered')
-authenticator.login(location='main')
+# Campo de entrada
+email = st.text_input("Digite seu e-mail para acessar")
 
-# Verificar status
-if st.session_state["authentication_status"]:
-    st.success(f"Bem-vinda, {st.session_state['name']}!")
-    st.write("Você está logada no AutoTributo.")
-elif st.session_state["authentication_status"] is False:
-    st.error("Usuário ou senha incorretos.")
-elif st.session_state["authentication_status"] is None:
-    st.warning("Por favor, insira suas credenciais.")
+# Botão de login
+if st.button("Entrar"):
+    if email:
+        if email in emails_autorizados:
+            st.success("Acesso liberado! Bem-vindo ao AutoTributo.")
+            # Aqui você pode redirecionar ou mostrar conteúdo exclusivo
+        else:
+            st.error("E-mail não autorizado. Solicite acesso na página de Cadastro.")
+    else:
+        st.warning("Digite seu e-mail para continuar.")
