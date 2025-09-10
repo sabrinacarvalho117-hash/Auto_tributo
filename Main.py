@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
+# Verifica se o usuário está logado
+if "usuario_logado" not in st.session_state or not st.session_state.usuario_logado:
+    st.warning("Você precisa fazer login antes de acessar esta página.")
+    st.stop()
 
 # Funções principais
 def ler_arquivo_sped(uploaded_file):
@@ -173,6 +177,7 @@ import streamlit as st
 if "usuario_logado" not in st.session_state or not st.session_state.usuario_logado:
     st.warning("Você precisa fazer login antes de acessar esta página.")
     st.stop()
+
 
 
 
