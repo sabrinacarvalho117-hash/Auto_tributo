@@ -4,7 +4,8 @@ import urllib.parse
 st.set_page_config(page_title="Aprovar Acesso", page_icon="✅")
 st.title("✅ Aprovação Automática")
 
-query_params = st.experimental_get_query_params()
+# Substituição recomendada pela Streamlit
+query_params = st.query_params
 email = query_params.get("email", [None])[0]
 
 if email:
